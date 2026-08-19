@@ -43,16 +43,6 @@ server:
             url: https://my402253.s4hana.cloud.sap
             destination: DSGPublic_DevelopmentTenant
             authenticationType: reentranceTicket
-    - name: sap-fe-mockserver
-      beforeMiddleware: csp
-      configuration:
-        mountPath: /
-        services:
-          - urlPath: /sap/opu/odata4/sap/zui_vo_appr_o4/srvd/sap/zui_vo_appr/0001
-            metadataPath: ./webapp/localService/mainService/metadata.xml
-            mockdataPath: ./webapp/localService/mainService/data
-            generateMockData: true
-        annotations: []
 builder:
   customTasks:
     - name: ui5-tooling-transpile-task

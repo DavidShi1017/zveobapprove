@@ -150,21 +150,7 @@
           "options": {
             "settings": {
               "editableHeaderContent": false,
-              "contextPath": "/Approval",
-              "content": {
-                "body": {
-                  "sections": {
-                    "SupplierDetails": {
-                      "template": "zveobapprove.ext.SupplierDetails",
-                      "title": "Supplier Details",
-                      "position": {
-                        "placement": "After",
-                        "anchor": "General"
-                      }
-                    }
-                  }
-                }
-              }
+              "contextPath": "/Approval"
             }
           }
         }
