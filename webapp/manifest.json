@@ -150,7 +150,16 @@
           "options": {
             "settings": {
               "editableHeaderContent": false,
-              "contextPath": "/Approval"
+              "contextPath": "/Approval",
+              "content": {
+                "body": {
+                  "sections": {
+                    "DeclarationCheckbox": {
+                      "template": "zveobapprove.ext.fragments.AckConfirmed"
+                    }
+                  }
+                }
+              }
             }
           }
         }
