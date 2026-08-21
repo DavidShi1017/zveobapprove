@@ -18,7 +18,7 @@ sap.ui.define(["sap/ui/core/mvc/ControllerExtension"], function (ControllerExten
     return ControllerExtension.extend("zveobapprove.ext.controller.ObjectPageExtension", {
         override: {
             onInit: function () {
-                var oView = this.base.getExtensionAPI().getView();
+                var oView = this.getView();
                 oView.addEventDelegate({
                     onAfterRendering: this._formatCommentDates.bind(this)
                 });
@@ -26,7 +26,7 @@ sap.ui.define(["sap/ui/core/mvc/ControllerExtension"], function (ControllerExten
         },
 
         _formatCommentDates: function () {
-            var oView = this.base.getExtensionAPI().getView();
+            var oView = this.getView();
             var aControls = oView.findAggregatedObjects(true, function (oControl) {
                 var oBindingInfo = oControl.getBindingInfo && oControl.getBindingInfo("text");
                 return oBindingInfo && oBindingInfo.parts && oBindingInfo.parts.some(function (oPart) {
