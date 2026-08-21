@@ -42,14 +42,18 @@ sap.ui.define(["sap/ui/core/mvc/ControllerExtension"], function (ControllerExten
             var oView = this.getView();
             var aControls = oView.findAggregatedObjects(true, function (oControl) {
                 var oContext = oControl.getBindingContext && oControl.getBindingContext();
-                if (oContext && oContext.getProperty("Timestamp") !== undefined && oControl.setText) {
+                if (oContext && oContext.getProperty("Timestamp") !== undefined &&
+                    (oControl.setText || oControl.setNumber)) {
                     return true;
                 }
 
                 var oBindingInfo = oControl.getBindingInfo && oControl.getBindingInfo("text");
-                return oBindingInfo && oBindingInfo.parts && oBindingInfo.parts.some(function (oPart) {
+                var oNumberBindingInfo = oControl.getBindingInfo && oControl.getBindingInfo("number");
+                return (oBindingInfo && oBindingInfo.parts && oBindingInfo.parts.some(function (oPart) {
                     return oPart.path === "Timestamp";
-                });
+                })) || (oNumberBindingInfo && oNumberBindingInfo.parts && oNumberBindingInfo.parts.some(function (oPart) {
+                    return oPart.path === "Timestamp";
+                }));
             });
 
             aControls.forEach(function (oControl) {
@@ -59,12 +63,18 @@ sap.ui.define(["sap/ui/core/mvc/ControllerExtension"], function (ControllerExten
 
                 var oContext = oControl.getBindingContext && oControl.getBindingContext();
                 if (oContext && oContext.getProperty("Timestamp") !== undefined) {
-                    oControl.setText(formatCommentDate(oContext.getProperty("Timestamp")));
+                    var sDate = formatCommentDate(oContext.getProperty("Timestamp"));
+                    if (oControl.setNumber) {
+                        oControl.setNumber(sDate);
+                    } else {
+                        oControl.setText(sDate);
+                    }
                     oControl.data("commentDateFormatted", true);
                     return;
                 }
 
-                oControl.bindProperty("text", {
+                var sProperty = oControl.setNumber ? "number" : "text";
+                oControl.bindProperty(sProperty, {
                     parts: [{ path: "Timestamp" }],
                     formatter: formatCommentDate
                 });
