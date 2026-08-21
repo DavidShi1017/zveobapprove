@@ -40,16 +40,75 @@ sap.ui.define(["sap/ui/core/mvc/ControllerExtension"], function (ControllerExten
         return null;
     }
 
+    function formatRenderedDate(oControl) {
+        var sValue = oControl.getNumber ? oControl.getNumber() : oControl.getText();
+        if (!sValue || !/[\d,]+\.\d+/.test(String(sValue))) {
+            return;
+        }
+
+        var sDate = formatCommentDate(String(sValue).replace(/,/g, ""));
+        if (oControl.setNumber) {
+            oControl.unbindProperty("number");
+            oControl.setNumber(sDate);
+        } else if (oControl.setText) {
+            oControl.unbindProperty("text");
+            oControl.setText(sDate);
+        }
+    }
+
     return ControllerExtension.extend("zveobapprove.ext.controller.ObjectPageExtension", {
         override: {
             onInit: function () {
                 var oView = this.getView();
                 oView.addEventDelegate({
-                    onAfterRendering: this._formatCommentDates.bind(this)
+                    onAfterRendering: this._formatTables.bind(this)
                 });
-                setTimeout(this._formatCommentDates.bind(this), 300);
-                setTimeout(this._formatCommentDates.bind(this), 1000);
+                setTimeout(this._formatTables.bind(this), 300);
+                setTimeout(this._formatTables.bind(this), 1000);
             }
+        },
+
+        _formatTables: function () {
+            this._formatCommentDates();
+            this._formatDateColumns();
+        },
+
+        _formatDateColumns: function () {
+            var oView = this.getView();
+            var aTables = oView.findAggregatedObjects(true, function (oControl) {
+                return oControl.getColumns && oControl.getItems && oControl.getItems().length;
+            });
+
+            aTables.forEach(function (oTable) {
+                var aColumns = oTable.getColumns();
+                var aDateIndexes = [];
+
+                aColumns.forEach(function (oColumn, iIndex) {
+                    var oHeader = oColumn.getHeader && oColumn.getHeader();
+                    var sHeader = oHeader && oHeader.getText && oHeader.getText();
+                    if (sHeader === "Date" || sHeader === "Timestamp") {
+                        aDateIndexes.push(iIndex);
+                    }
+                });
+
+                if (!aDateIndexes.length) {
+                    return;
+                }
+
+                if (!oTable.data("dateColumnRefreshAttached") && oTable.attachUpdateFinished) {
+                    oTable.attachUpdateFinished(this._formatDateColumns.bind(this));
+                    oTable.data("dateColumnRefreshAttached", true);
+                }
+
+                oTable.getItems().forEach(function (oItem) {
+                    var aCells = oItem.getCells && oItem.getCells();
+                    aDateIndexes.forEach(function (iIndex) {
+                        if (aCells && aCells[iIndex]) {
+                            formatRenderedDate(aCells[iIndex]);
+                        }
+                    });
+                });
+            }.bind(this));
         },
 
         _formatCommentDates: function () {
