@@ -6,13 +6,26 @@ sap.ui.define(["sap/ui/core/mvc/ControllerExtension"], function (ControllerExten
             return "";
         }
 
-        var digits = String(value).split(".")[0];
+        var sValue = String(value);
+        var digits = sValue.split(".")[0];
         var match = digits.match(/^(\d{4})(\d{2})(\d{2})/);
-        if (!match) {
-            return String(value);
+        var oDate;
+
+        if (match) {
+            oDate = new Date(Date.UTC(
+                Number(match[1]),
+                Number(match[2]) - 1,
+                Number(match[3])
+            ));
+        } else if (!isNaN(Number(value)) && Number(value) > 0 && Number(value) < 100000) {
+            oDate = new Date(Date.UTC(1899, 11, 30) + Number(value) * 86400000);
+        } else {
+            return sValue;
         }
 
-        return match[3] + "/" + match[2] + "/" + match[1];
+        return String(oDate.getUTCDate()).padStart(2, "0") + "/" +
+            String(oDate.getUTCMonth() + 1).padStart(2, "0") + "/" +
+            oDate.getUTCFullYear();
     }
 
     return ControllerExtension.extend("zveobapprove.ext.controller.ObjectPageExtension", {
@@ -28,6 +41,11 @@ sap.ui.define(["sap/ui/core/mvc/ControllerExtension"], function (ControllerExten
         _formatCommentDates: function () {
             var oView = this.getView();
             var aControls = oView.findAggregatedObjects(true, function (oControl) {
+                var oContext = oControl.getBindingContext && oControl.getBindingContext();
+                if (oContext && oContext.getProperty("Timestamp") !== undefined && oControl.setText) {
+                    return true;
+                }
+
                 var oBindingInfo = oControl.getBindingInfo && oControl.getBindingInfo("text");
                 return oBindingInfo && oBindingInfo.parts && oBindingInfo.parts.some(function (oPart) {
                     return oPart.path === "Timestamp";
@@ -36,6 +54,13 @@ sap.ui.define(["sap/ui/core/mvc/ControllerExtension"], function (ControllerExten
 
             aControls.forEach(function (oControl) {
                 if (oControl.data("commentDateFormatted")) {
+                    return;
+                }
+
+                var oContext = oControl.getBindingContext && oControl.getBindingContext();
+                if (oContext && oContext.getProperty("Timestamp") !== undefined) {
+                    oControl.setText(formatCommentDate(oContext.getProperty("Timestamp")));
+                    oControl.data("commentDateFormatted", true);
                     return;
                 }
 
