@@ -155,7 +155,11 @@
                 "body": {
                   "sections": {
                     "DeclarationCheckbox": {
-                      "template": "zveobapprove.ext.fragments.AckConfirmed"
+                      "template": "zveobapprove.ext.fragments.AckConfirmed",
+                      "position": {
+                        "placement": "After",
+                        "anchor": "SupportingDocument"
+                      }
                     }
                   }
                 }
