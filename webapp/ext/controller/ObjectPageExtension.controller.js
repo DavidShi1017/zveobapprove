@@ -28,6 +28,18 @@ sap.ui.define(["sap/ui/core/mvc/ControllerExtension"], function (ControllerExten
             oDate.getUTCFullYear();
     }
 
+    function getTimestampContext(oControl) {
+        var oCurrent = oControl;
+        while (oCurrent) {
+            var oContext = oCurrent.getBindingContext && oCurrent.getBindingContext();
+            if (oContext && oContext.getProperty("Timestamp") !== undefined) {
+                return oContext;
+            }
+            oCurrent = oCurrent.getParent && oCurrent.getParent();
+        }
+        return null;
+    }
+
     return ControllerExtension.extend("zveobapprove.ext.controller.ObjectPageExtension", {
         override: {
             onInit: function () {
@@ -35,13 +47,15 @@ sap.ui.define(["sap/ui/core/mvc/ControllerExtension"], function (ControllerExten
                 oView.addEventDelegate({
                     onAfterRendering: this._formatCommentDates.bind(this)
                 });
+                setTimeout(this._formatCommentDates.bind(this), 300);
+                setTimeout(this._formatCommentDates.bind(this), 1000);
             }
         },
 
         _formatCommentDates: function () {
             var oView = this.getView();
             var aControls = oView.findAggregatedObjects(true, function (oControl) {
-                var oContext = oControl.getBindingContext && oControl.getBindingContext();
+                var oContext = getTimestampContext(oControl);
                 if (oContext && oContext.getProperty("Timestamp") !== undefined &&
                     (oControl.setText || oControl.setNumber)) {
                     return true;
@@ -57,19 +71,26 @@ sap.ui.define(["sap/ui/core/mvc/ControllerExtension"], function (ControllerExten
             });
 
             aControls.forEach(function (oControl) {
-                if (oControl.data("commentDateFormatted")) {
-                    return;
-                }
+                var oContext = getTimestampContext(oControl);
+                if (oContext) {
+                    var sTimestamp = String(oContext.getProperty("Timestamp"));
+                    if (oControl.data("commentDateValue") === sTimestamp) {
+                        return;
+                    }
 
-                var oContext = oControl.getBindingContext && oControl.getBindingContext();
-                if (oContext && oContext.getProperty("Timestamp") !== undefined) {
                     var sDate = formatCommentDate(oContext.getProperty("Timestamp"));
                     if (oControl.setNumber) {
+                        if (oControl.isBound && oControl.isBound("number")) {
+                            oControl.unbindProperty("number");
+                        }
                         oControl.setNumber(sDate);
                     } else {
+                        if (oControl.isBound && oControl.isBound("text")) {
+                            oControl.unbindProperty("text");
+                        }
                         oControl.setText(sDate);
                     }
-                    oControl.data("commentDateFormatted", true);
+                    oControl.data("commentDateValue", sTimestamp);
                     return;
                 }
 
@@ -78,7 +99,6 @@ sap.ui.define(["sap/ui/core/mvc/ControllerExtension"], function (ControllerExten
                     parts: [{ path: "Timestamp" }],
                     formatter: formatCommentDate
                 });
-                oControl.data("commentDateFormatted", true);
             });
         }
     });
