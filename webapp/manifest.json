@@ -154,6 +154,14 @@
               "content": {
                 "body": {
                   "sections": {
+                    "SupplierDetails": {
+                      "template": "zveobapprove.ext.fragments.SupplierDetails",
+                      "title": "Supplier Details",
+                      "position": {
+                        "placement": "After",
+                        "anchor": "General"
+                      }
+                    },
                     "DeclarationCheckbox": {
                       "template": "zveobapprove.ext.fragments.AckConfirmed",
                       "position": {
