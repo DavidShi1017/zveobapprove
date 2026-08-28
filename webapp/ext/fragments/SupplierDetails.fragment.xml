@@ -3,12 +3,13 @@
     xmlns="sap.m"
     xmlns:l="sap.ui.layout">
     <!--
-      Approver "Supplier Details" - two-panel layout (aligned with F4P zveobapprove).
+      Approver "Supplier Details" - two-panel layout.
       LEFT  "Supplier Data": every field with its current value. For a changed field this is the OLD
             value (the state before the request); otherwise the current value. For a CREATE request
             nothing is flagged, so the left simply shows the new supplier data.
       RIGHT "Requested Changes": only the fields the requestor flagged (ChgX), each marked with a green
-            check and its NEW value. Empty for CREATE (an info strip explains it is a brand-new supplier).
+            check and its NEW value. Hidden entirely for CREATE requests (nothing was changed, so there
+            is no left/right difference to compare).
     -->
     <l:Grid defaultSpan="XL6 L6 M12 S12" hSpacing="2" vSpacing="0" class="sapUiSmallMargin">
 
@@ -19,96 +20,89 @@
             <Label text="Name &amp; Contact" design="Bold" class="sapUiSmallMarginBottom"/>
             <HBox class="sapUiTinyMarginBottom">
                 <Label text="Supplier Name" width="9rem"/>
-                <Text text="{= !!${ChgName} ? ${OldName} : ${SupplierName}}"/>
+                <Text text="{parts: ['ChgName','OldName','SupplierName'], formatter: 'zveobapprove.ext.formatter.diffOrCurrent'}"/>
             </HBox>
             <HBox class="sapUiTinyMarginBottom">
                 <Label text="Email Address" width="9rem"/>
-                <Text text="{= !!${ChgEmail} ? ${OldEmail} : ${Email}}"/>
+                <Text text="{parts: ['ChgEmail','OldEmail','Email'], formatter: 'zveobapprove.ext.formatter.diffOrCurrent'}"/>
             </HBox>
             <HBox class="sapUiTinyMarginBottom">
                 <Label text="Contact Number" width="9rem"/>
-                <Text text="{= !!${ChgContact} ? ${OldContact} : ${ContactNumber}}"/>
+                <Text text="{parts: ['ChgContact','OldContact','ContactNumber'], formatter: 'zveobapprove.ext.formatter.diffOrCurrent'}"/>
             </HBox>
 
             <Label text="Address" design="Bold" class="sapUiMediumMarginTop sapUiSmallMarginBottom"/>
             <HBox class="sapUiTinyMarginBottom">
                 <Label text="Street" width="9rem"/>
-                <Text text="{= !!${ChgAddress} ? ${OldStreet} : ${Street}}"/>
+                <Text text="{parts: ['ChgAddress','OldStreet','Street'], formatter: 'zveobapprove.ext.formatter.diffOrCurrent'}"/>
             </HBox>
             <HBox class="sapUiTinyMarginBottom">
                 <Label text="House No." width="9rem"/>
-                <Text text="{= !!${ChgHouse} ? ${OldHouseNumber} : ${HouseNumber}}"/>
+                <Text text="{parts: ['ChgHouse','OldHouseNumber','HouseNumber'], formatter: 'zveobapprove.ext.formatter.diffOrCurrent'}"/>
             </HBox>
             <HBox class="sapUiTinyMarginBottom">
                 <Label text="City" width="9rem"/>
-                <Text text="{= !!${ChgCity} ? ${OldCity} : ${City}}"/>
+                <Text text="{parts: ['ChgCity','OldCity','City'], formatter: 'zveobapprove.ext.formatter.diffOrCurrent'}"/>
             </HBox>
             <HBox class="sapUiTinyMarginBottom">
                 <Label text="Postal Code" width="9rem"/>
-                <Text text="{= !!${ChgPostal} ? ${OldPostalCode} : ${PostalCode}}"/>
+                <Text text="{parts: ['ChgPostal','OldPostalCode','PostalCode'], formatter: 'zveobapprove.ext.formatter.diffOrCurrent'}"/>
             </HBox>
             <HBox class="sapUiTinyMarginBottom">
                 <Label text="State / Region" width="9rem"/>
-                <Text text="{= !!${ChgRegion} ? ${OldRegion} : ${Region}}"/>
+                <Text text="{parts: ['ChgRegion','OldRegion','Region'], formatter: 'zveobapprove.ext.formatter.diffOrCurrent'}"/>
             </HBox>
             <HBox class="sapUiTinyMarginBottom">
                 <Label text="Country" width="9rem"/>
-                <Text text="{= !!${ChgCountry} ? ${OldCountry} : ${Country}}"/>
+                <Text text="{parts: ['ChgCountry','OldCountry','Country'], formatter: 'zveobapprove.ext.formatter.diffOrCurrent'}"/>
             </HBox>
         </VBox>
 
-        <!-- ============ RIGHT: requested changes (changed fields only) ============ -->
-        <VBox>
+        <!-- ============ RIGHT: requested changes (changed fields only; hidden for CREATE) ============ -->
+        <VBox visible="{parts: ['RequestType'], formatter: 'zveobapprove.ext.formatter.isUpdateRequest'}">
             <Title text="Requested Changes" titleStyle="H5" class="sapUiSmallMarginBottom"/>
 
-            <MessageStrip
-                visible="{= ${RequestType} === 'CREATE'}"
-                text="Brand-new supplier - all data on the left is being created (no prior values to compare)."
-                type="Information"
-                showIcon="true"
-                class="sapUiTinyMarginBottom"/>
-
-            <HBox visible="{= !!${ChgName}}" alignItems="Center" class="sapUiTinyMarginBottom">
+            <HBox visible="{ChgName}" alignItems="Center" class="sapUiTinyMarginBottom">
                 <core:Icon src="sap-icon://accept" color="Positive" class="sapUiTinyMarginEnd"/>
                 <Label text="Supplier Name" width="9rem"/>
                 <ObjectStatus text="{SupplierName}" state="Information"/>
             </HBox>
-            <HBox visible="{= !!${ChgEmail}}" alignItems="Center" class="sapUiTinyMarginBottom">
+            <HBox visible="{ChgEmail}" alignItems="Center" class="sapUiTinyMarginBottom">
                 <core:Icon src="sap-icon://accept" color="Positive" class="sapUiTinyMarginEnd"/>
                 <Label text="Email Address" width="9rem"/>
                 <ObjectStatus text="{Email}" state="Information"/>
             </HBox>
-            <HBox visible="{= !!${ChgContact}}" alignItems="Center" class="sapUiTinyMarginBottom">
+            <HBox visible="{ChgContact}" alignItems="Center" class="sapUiTinyMarginBottom">
                 <core:Icon src="sap-icon://accept" color="Positive" class="sapUiTinyMarginEnd"/>
                 <Label text="Contact Number" width="9rem"/>
                 <ObjectStatus text="{ContactNumber}" state="Information"/>
             </HBox>
-            <HBox visible="{= !!${ChgAddress}}" alignItems="Center" class="sapUiTinyMarginBottom">
+            <HBox visible="{ChgAddress}" alignItems="Center" class="sapUiTinyMarginBottom">
                 <core:Icon src="sap-icon://accept" color="Positive" class="sapUiTinyMarginEnd"/>
                 <Label text="Street" width="9rem"/>
                 <ObjectStatus text="{Street}" state="Information"/>
             </HBox>
-            <HBox visible="{= !!${ChgHouse}}" alignItems="Center" class="sapUiTinyMarginBottom">
+            <HBox visible="{ChgHouse}" alignItems="Center" class="sapUiTinyMarginBottom">
                 <core:Icon src="sap-icon://accept" color="Positive" class="sapUiTinyMarginEnd"/>
                 <Label text="House No." width="9rem"/>
                 <ObjectStatus text="{HouseNumber}" state="Information"/>
             </HBox>
-            <HBox visible="{= !!${ChgCity}}" alignItems="Center" class="sapUiTinyMarginBottom">
+            <HBox visible="{ChgCity}" alignItems="Center" class="sapUiTinyMarginBottom">
                 <core:Icon src="sap-icon://accept" color="Positive" class="sapUiTinyMarginEnd"/>
                 <Label text="City" width="9rem"/>
                 <ObjectStatus text="{City}" state="Information"/>
             </HBox>
-            <HBox visible="{= !!${ChgPostal}}" alignItems="Center" class="sapUiTinyMarginBottom">
+            <HBox visible="{ChgPostal}" alignItems="Center" class="sapUiTinyMarginBottom">
                 <core:Icon src="sap-icon://accept" color="Positive" class="sapUiTinyMarginEnd"/>
                 <Label text="Postal Code" width="9rem"/>
                 <ObjectStatus text="{PostalCode}" state="Information"/>
             </HBox>
-            <HBox visible="{= !!${ChgRegion}}" alignItems="Center" class="sapUiTinyMarginBottom">
+            <HBox visible="{ChgRegion}" alignItems="Center" class="sapUiTinyMarginBottom">
                 <core:Icon src="sap-icon://accept" color="Positive" class="sapUiTinyMarginEnd"/>
                 <Label text="State / Region" width="9rem"/>
                 <ObjectStatus text="{Region}" state="Information"/>
             </HBox>
-            <HBox visible="{= !!${ChgCountry}}" alignItems="Center" class="sapUiTinyMarginBottom">
+            <HBox visible="{ChgCountry}" alignItems="Center" class="sapUiTinyMarginBottom">
                 <core:Icon src="sap-icon://accept" color="Positive" class="sapUiTinyMarginEnd"/>
                 <Label text="Country" width="9rem"/>
                 <ObjectStatus text="{Country}" state="Information"/>
