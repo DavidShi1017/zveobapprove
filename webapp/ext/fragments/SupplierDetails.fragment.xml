@@ -3,96 +3,116 @@
     xmlns="sap.m"
     xmlns:l="sap.ui.layout">
     <!--
-      Approval "Supplier Details" = the before/after comparison, shown ONLY for UPDATE requests.
-
-      For CREATE requests nothing has changed, and the standard "General Information" + "Address"
-      sections already show the current values, so this section is hidden entirely (no duplicate
-      values, no empty "Requested Changes" panel).
-
-      For UPDATE requests it lists only the fields the requestor flagged (ChgX = changed), each as
-      "Old value -> New value" with a read-only checkbox marking the change.
-
-      Selection note: ChgX / OldX / RequestType carry no UI annotation, so autoExpandSelect does not
-      put them in $select by default. The visible CheckBox (selected) and Text (text) bindings below
-      are DIRECT bindings, which autoExpandSelect collects; the hidden <Text text="{RequestType}"/>
-      does the same for RequestType, which is only read inside the expression binding on the section's
-      visible.
+      Approver "Supplier Details" - FS two-panel layout.
+      LEFT  "Supplier Data": every field with its current value. For a changed field this is the OLD
+            value (the state before the request); otherwise the current value. For a CREATE request
+            nothing is flagged, so the left simply shows the new supplier data.
+      RIGHT "Requested Changes": only the fields the requestor flagged (ChgX), each marked with a green
+            check and its NEW value. Empty for CREATE (an info strip explains it is a brand-new supplier).
     -->
-    <VBox visible="{= ${RequestType} === 'UPDATE'}">
-        <Text text="{RequestType}" visible="false"/>
+    <l:Grid defaultSpan="XL6 L6 M12 S12" hSpacing="2" vSpacing="0" class="sapUiSmallMargin">
 
-        <Title text="Requested Changes" titleStyle="H5" class="sapUiSmallMarginBottom"/>
+        <!-- ============ LEFT: current supplier data ============ -->
+        <VBox>
+            <Title text="Supplier Data" titleStyle="H5" class="sapUiSmallMarginBottom"/>
 
-        <HBox visible="{= !!${ChgName}}" alignItems="Center" class="sapUiTinyMarginBottom">
-            <CheckBox selected="{ChgName}" enabled="false" class="sapUiTinyMarginEnd"/>
-            <Label text="Supplier Name" width="9rem"/>
-            <Text text="{OldName}" class="sapUiTinyMarginEnd"/>
-            <Text text="→" class="sapUiTinyMarginEnd"/>
-            <Text text="{SupplierName}"/>
-        </HBox>
+            <Label text="Name &amp; Contact" design="Bold" class="sapUiSmallMarginBottom"/>
+            <HBox class="sapUiTinyMarginBottom">
+                <Label text="Supplier Name" width="9rem"/>
+                <Text text="{= !!${ChgName} ? ${OldName} : ${SupplierName}}"/>
+            </HBox>
+            <HBox class="sapUiTinyMarginBottom">
+                <Label text="Email Address" width="9rem"/>
+                <Text text="{= !!${ChgEmail} ? ${OldEmail} : ${Email}}"/>
+            </HBox>
+            <HBox class="sapUiTinyMarginBottom">
+                <Label text="Contact Number" width="9rem"/>
+                <Text text="{= !!${ChgContact} ? ${OldContact} : ${ContactNumber}}"/>
+            </HBox>
 
-        <HBox visible="{= !!${ChgEmail}}" alignItems="Center" class="sapUiTinyMarginBottom">
-            <CheckBox selected="{ChgEmail}" enabled="false" class="sapUiTinyMarginEnd"/>
-            <Label text="Email Address" width="9rem"/>
-            <Text text="{OldEmail}" class="sapUiTinyMarginEnd"/>
-            <Text text="→" class="sapUiTinyMarginEnd"/>
-            <Text text="{Email}"/>
-        </HBox>
+            <Label text="Address" design="Bold" class="sapUiMediumMarginTop sapUiSmallMarginBottom"/>
+            <HBox class="sapUiTinyMarginBottom">
+                <Label text="Street" width="9rem"/>
+                <Text text="{= !!${ChgAddress} ? ${OldStreet} : ${Street}}"/>
+            </HBox>
+            <HBox class="sapUiTinyMarginBottom">
+                <Label text="House No." width="9rem"/>
+                <Text text="{= !!${ChgHouse} ? ${OldHouseNumber} : ${HouseNumber}}"/>
+            </HBox>
+            <HBox class="sapUiTinyMarginBottom">
+                <Label text="City" width="9rem"/>
+                <Text text="{= !!${ChgCity} ? ${OldCity} : ${City}}"/>
+            </HBox>
+            <HBox class="sapUiTinyMarginBottom">
+                <Label text="Postal Code" width="9rem"/>
+                <Text text="{= !!${ChgPostal} ? ${OldPostalCode} : ${PostalCode}}"/>
+            </HBox>
+            <HBox class="sapUiTinyMarginBottom">
+                <Label text="State / Region" width="9rem"/>
+                <Text text="{= !!${ChgRegion} ? ${OldRegion} : ${Region}}"/>
+            </HBox>
+            <HBox class="sapUiTinyMarginBottom">
+                <Label text="Country" width="9rem"/>
+                <Text text="{= !!${ChgCountry} ? ${OldCountry} : ${SupplierCountry}}"/>
+            </HBox>
+        </VBox>
 
-        <HBox visible="{= !!${ChgContact}}" alignItems="Center" class="sapUiTinyMarginBottom">
-            <CheckBox selected="{ChgContact}" enabled="false" class="sapUiTinyMarginEnd"/>
-            <Label text="Contact Number" width="9rem"/>
-            <Text text="{OldContact}" class="sapUiTinyMarginEnd"/>
-            <Text text="→" class="sapUiTinyMarginEnd"/>
-            <Text text="{ContactNumber}"/>
-        </HBox>
+        <!-- ============ RIGHT: requested changes (changed fields only) ============ -->
+        <VBox>
+            <Title text="Requested Changes" titleStyle="H5" class="sapUiSmallMarginBottom"/>
 
-        <HBox visible="{= !!${ChgAddress}}" alignItems="Center" class="sapUiTinyMarginBottom">
-            <CheckBox selected="{ChgAddress}" enabled="false" class="sapUiTinyMarginEnd"/>
-            <Label text="Street" width="9rem"/>
-            <Text text="{OldStreet}" class="sapUiTinyMarginEnd"/>
-            <Text text="→" class="sapUiTinyMarginEnd"/>
-            <Text text="{Street}"/>
-        </HBox>
+            <MessageStrip
+                visible="{= ${RequestType} === 'CREATE'}"
+                text="Brand-new supplier - all data on the left is being created (no prior values to compare)."
+                type="Information"
+                showIcon="true"
+                class="sapUiTinyMarginBottom"/>
 
-        <HBox visible="{= !!${ChgHouse}}" alignItems="Center" class="sapUiTinyMarginBottom">
-            <CheckBox selected="{ChgHouse}" enabled="false" class="sapUiTinyMarginEnd"/>
-            <Label text="House No." width="9rem"/>
-            <Text text="{OldHouseNumber}" class="sapUiTinyMarginEnd"/>
-            <Text text="→" class="sapUiTinyMarginEnd"/>
-            <Text text="{HouseNumber}"/>
-        </HBox>
-
-        <HBox visible="{= !!${ChgCity}}" alignItems="Center" class="sapUiTinyMarginBottom">
-            <CheckBox selected="{ChgCity}" enabled="false" class="sapUiTinyMarginEnd"/>
-            <Label text="City" width="9rem"/>
-            <Text text="{OldCity}" class="sapUiTinyMarginEnd"/>
-            <Text text="→" class="sapUiTinyMarginEnd"/>
-            <Text text="{City}"/>
-        </HBox>
-
-        <HBox visible="{= !!${ChgPostal}}" alignItems="Center" class="sapUiTinyMarginBottom">
-            <CheckBox selected="{ChgPostal}" enabled="false" class="sapUiTinyMarginEnd"/>
-            <Label text="Postal Code" width="9rem"/>
-            <Text text="{OldPostalCode}" class="sapUiTinyMarginEnd"/>
-            <Text text="→" class="sapUiTinyMarginEnd"/>
-            <Text text="{PostalCode}"/>
-        </HBox>
-
-        <HBox visible="{= !!${ChgRegion}}" alignItems="Center" class="sapUiTinyMarginBottom">
-            <CheckBox selected="{ChgRegion}" enabled="false" class="sapUiTinyMarginEnd"/>
-            <Label text="State / Region" width="9rem"/>
-            <Text text="{OldRegion}" class="sapUiTinyMarginEnd"/>
-            <Text text="→" class="sapUiTinyMarginEnd"/>
-            <Text text="{Region}"/>
-        </HBox>
-
-        <HBox visible="{= !!${ChgCountry}}" alignItems="Center" class="sapUiTinyMarginBottom">
-            <CheckBox selected="{ChgCountry}" enabled="false" class="sapUiTinyMarginEnd"/>
-            <Label text="Country" width="9rem"/>
-            <Text text="{OldCountry}" class="sapUiTinyMarginEnd"/>
-            <Text text="→" class="sapUiTinyMarginEnd"/>
-            <Text text="{Country}"/>
-        </HBox>
-    </VBox>
+            <HBox visible="{= !!${ChgName}}" alignItems="Center" class="sapUiTinyMarginBottom">
+                <core:Icon src="sap-icon://accept" color="Positive" class="sapUiTinyMarginEnd"/>
+                <Label text="Supplier Name" width="9rem"/>
+                <ObjectStatus text="{SupplierName}" state="Information"/>
+            </HBox>
+            <HBox visible="{= !!${ChgEmail}}" alignItems="Center" class="sapUiTinyMarginBottom">
+                <core:Icon src="sap-icon://accept" color="Positive" class="sapUiTinyMarginEnd"/>
+                <Label text="Email Address" width="9rem"/>
+                <ObjectStatus text="{Email}" state="Information"/>
+            </HBox>
+            <HBox visible="{= !!${ChgContact}}" alignItems="Center" class="sapUiTinyMarginBottom">
+                <core:Icon src="sap-icon://accept" color="Positive" class="sapUiTinyMarginEnd"/>
+                <Label text="Contact Number" width="9rem"/>
+                <ObjectStatus text="{ContactNumber}" state="Information"/>
+            </HBox>
+            <HBox visible="{= !!${ChgAddress}}" alignItems="Center" class="sapUiTinyMarginBottom">
+                <core:Icon src="sap-icon://accept" color="Positive" class="sapUiTinyMarginEnd"/>
+                <Label text="Street" width="9rem"/>
+                <ObjectStatus text="{Street}" state="Information"/>
+            </HBox>
+            <HBox visible="{= !!${ChgHouse}}" alignItems="Center" class="sapUiTinyMarginBottom">
+                <core:Icon src="sap-icon://accept" color="Positive" class="sapUiTinyMarginEnd"/>
+                <Label text="House No." width="9rem"/>
+                <ObjectStatus text="{HouseNumber}" state="Information"/>
+            </HBox>
+            <HBox visible="{= !!${ChgCity}}" alignItems="Center" class="sapUiTinyMarginBottom">
+                <core:Icon src="sap-icon://accept" color="Positive" class="sapUiTinyMarginEnd"/>
+                <Label text="City" width="9rem"/>
+                <ObjectStatus text="{City}" state="Information"/>
+            </HBox>
+            <HBox visible="{= !!${ChgPostal}}" alignItems="Center" class="sapUiTinyMarginBottom">
+                <core:Icon src="sap-icon://accept" color="Positive" class="sapUiTinyMarginEnd"/>
+                <Label text="Postal Code" width="9rem"/>
+                <ObjectStatus text="{PostalCode}" state="Information"/>
+            </HBox>
+            <HBox visible="{= !!${ChgRegion}}" alignItems="Center" class="sapUiTinyMarginBottom">
+                <core:Icon src="sap-icon://accept" color="Positive" class="sapUiTinyMarginEnd"/>
+                <Label text="State / Region" width="9rem"/>
+                <ObjectStatus text="{Region}" state="Information"/>
+            </HBox>
+            <HBox visible="{= !!${ChgCountry}}" alignItems="Center" class="sapUiTinyMarginBottom">
+                <core:Icon src="sap-icon://accept" color="Positive" class="sapUiTinyMarginEnd"/>
+                <Label text="Country" width="9rem"/>
+                <ObjectStatus text="{SupplierCountry}" state="Information"/>
+            </HBox>
+        </VBox>
+    </l:Grid>
 </core:FragmentDefinition>
